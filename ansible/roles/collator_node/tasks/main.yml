@@ -1,0 +1,26 @@
+---
+- name: Import the security@parity.io GPG key
+  shell: |
+    sudo gpg --recv-keys --keyserver hkps://keys.mailvelope.com 9D4B2B6EB8F97156D19669A9FF0812D491B96798
+    sudo gpg --export 9D4B2B6EB8F97156D19669A9FF0812D491B96798 | sudo tee /usr/share/keyrings/parity.gpg
+- name: Add the Parity repository and update the package index
+  shell: |
+    echo 'deb [signed-by=/usr/share/keyrings/parity.gpg] https://releases.parity.io/deb release main' | sudo tee /etc/apt/sources.list.d/parity.list
+    sudo apt update
+- name: Install the `parity-keyring` package to ensure that the GPG key used by apt remains up-to-date
+  shell: sudo apt install parity-keyring
+
+- name: Install Polkadot
+  shell: sudo apt install polkadot
+
+- name: Create Polkadot systemd service file
+  template:
+    src: collator_node.service
+    dest: /etc/systemd/system/polkadot.service
+    owner: root
+    group: root
+    mode: 0600
+  become: yes
+
+- name: Enable Polkadot systemd service
+  shell: sudo systemctl enable polkadot

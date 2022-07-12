@@ -1,0 +1,28 @@
+[Service]
+User=polkadot
+Group=polkadot
+
+ExecStart=/usr/bin/polkadot \
+  --name=derek-rpc
+  --pruning=archive
+  --ws-port 9944
+  --unsafe-ws-external
+  --rpc-cors=all
+  --chain=rococo
+  --base-path=/dev/sdh/polkadot/db
+  --listen-addr=/ip4/0.0.0.0/tcp/30334
+  --public-addr=/ip4/0.0.0.0/tcp/30334
+  --execution=wasm
+  --rpc-methods=Unsafe
+  --execution=wasm
+  --listen-addr=/ip4/0.0.0.0/tcp/30333
+  --public-addr=/ip4/0.0.0.0/tcp/30333
+  --rpc-methods=Unsafe
+  --rpc-port=9056
+  --enable-log-reloading
+
+Restart=always
+RestartSec=60
+
+[Install]
+WantedBy=multi-user.target

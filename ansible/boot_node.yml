@@ -1,0 +1,5 @@
+- name: Setup Polkadot node
+  hosts: all
+
+  roles:
+    - polkadot_boot_node
