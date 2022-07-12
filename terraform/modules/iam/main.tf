@@ -1,6 +1,6 @@
 resource "aws_iam_group_membership" "managing_users_group_membership" {
   name = "${ var.group_name }-membership"
-  users = [ data.aws_iam_user.managing_user.id ]
+  users = [ aws_iam_user.managing_user.id ]
   group = aws_iam_group.managing_users_group.name
 }
 
@@ -10,12 +10,12 @@ resource "aws_iam_group" "managing_users_group" {
 
 resource "aws_iam_group_policy_attachment" "certificate-manager-attachment" {
   group      = aws_iam_group.managing_users_group.name
-  policy_arn = "arn:aws:iam::aws:policy/CertificateManagerFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AWSCertificateManagerFullAccess"
 }
 
 resource "aws_iam_group_policy_attachment" "vpc-attachment" {
   group      = aws_iam_group.managing_users_group.name
-  policy_arn = "arn:aws:iam::aws:policy/VPCFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonVPCFullAccess"
 }
 
 resource "aws_iam_group_policy_attachment" "s3-attachment" {
@@ -25,7 +25,7 @@ resource "aws_iam_group_policy_attachment" "s3-attachment" {
 
 resource "aws_iam_group_policy_attachment" "secrets-manager-attachment" {
   group      = aws_iam_group.managing_users_group.name
-  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/SecretsManagerReadWrite"
 }
 
 resource "aws_iam_group_policy_attachment" "iam-attachment" {
@@ -35,17 +35,17 @@ resource "aws_iam_group_policy_attachment" "iam-attachment" {
 
 resource "aws_iam_group_policy_attachment" "ec2-container-registry-attachment" {
   group      = aws_iam_group.managing_users_group.name
-  policy_arn = "arn:aws:iam::aws:policy/EC2ContainerRegistryFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"
 }
 
 resource "aws_iam_group_policy_attachment" "ec2-attachment" {
   group      = aws_iam_group.managing_users_group.name
-  policy_arn = "arn:aws:iam::aws:policy/EC2FullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 }
 
 resource "aws_iam_group_policy_attachment" "ecs-attachment" {
   group      = aws_iam_group.managing_users_group.name
-  policy_arn = "arn:aws:iam::aws:policy/ECSFullAccess"
+  policy_arn = "arn:aws:iam::aws:policy/AmazonECS_FullAccess"
 }
 
 resource "aws_iam_group_policy_attachment" "cloudwatch-logs-attachment" {
@@ -74,6 +74,13 @@ resource "aws_iam_policy" "decode-authorization-message-policy" {
     })
 }
 
-data "aws_iam_user" "managing_user" {
-  user_name = "${ var.username }"
+resource "aws_iam_access_key" "managing_user_access_key" {
+  user = aws_iam_user.managing_user.name
+}
+resource "aws_iam_user" "managing_user" {
+  name = "polkadot"
+
+  tags = {
+    tag-key = "polkadot"
+  }
 }
