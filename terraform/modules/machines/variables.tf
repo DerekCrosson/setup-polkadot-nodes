@@ -161,7 +161,3 @@ variable "volumes" {
 variable "security_group_name" {
   default = "polkadot"
 }
-
-variable "public_key" {
-  default = "put ssh key here"
-}

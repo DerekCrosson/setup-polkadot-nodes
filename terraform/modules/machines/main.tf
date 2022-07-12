@@ -47,9 +47,14 @@ resource "aws_instance" "polkadot_node" {
     tags                        = each.value.tags
 }
 
+resource "tls_private_key" "ssh_key" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 resource "aws_key_pair" "polkadot_node_key_pair" {
   key_name   = "polkadot-public-key"
-  public_key = var.public_key
+  public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
 resource "aws_network_interface_sg_attachment" "all_nodes_security_group_attachment" {

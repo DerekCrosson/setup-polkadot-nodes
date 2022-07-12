@@ -35,8 +35,6 @@ make terraform-plan
 make terraform-apply
 ```
 
-Edit the `public_key` variable in the `machines` module with your SSH public key
-
 ## Destroy infrastructure (cannot be undone)
 ```
 make terraform-destroy
