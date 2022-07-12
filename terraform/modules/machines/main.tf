@@ -147,3 +147,12 @@ resource "aws_elb_attachment" "load_balancer_attachment" {
       elb      = aws_elb.load_balancer.id
       instance = aws_instance.polkadot_node[each.key].id
 }
+
+resource "local_file" "ansible_inventory" {
+  filename = "../ansible/inventory/hosts.ini"
+  for_each = {for k, v in merge(var.boot_nodes, var.collator_nodes, var.rpc_nodes) : k => v}
+    content = <<EOF
+    [webserver]
+    ${aws_instance.polkadot_node[each.key].id}
+    EOF
+}
