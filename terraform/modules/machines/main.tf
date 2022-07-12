@@ -52,80 +52,23 @@ resource "aws_key_pair" "polkadot_node_key_pair" {
   public_key = var.public_key
 }
 
-resource "aws_security_group" "polkadot_all_nodes" {
-  name = "polkadot-all-nodes"
-}
-
-resource "aws_security_group_rule" "all_nodes_rule" {
-  for_each = toset(var.all_node_ports)
-    type            = "ingress"
-    from_port       = each.key
-    to_port         = each.key
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-
-  security_group_id = "${aws_security_group.polkadot_all_nodes.id}"
-}
-
-resource "aws_security_group_rule" "external_ssh_rule" {
-  type            = "ingress"
-  from_port       = 22
-  to_port         = 22
-  protocol        = "tcp"
-  cidr_blocks = ["0.0.0.0/0"]
-
-  security_group_id = "${aws_security_group.polkadot_all_nodes.id}"
-}
-
-resource "aws_security_group" "polkadot_collator_nodes" {
-  name = "polkadot-collator-nodes"
-}
-
-resource "aws_security_group_rule" "collator_nodes_rule" {
-  for_each = toset(var.collator_node_ports)
-    type            = "ingress"
-    from_port       = each.key
-    to_port         = each.key
-    protocol        = "tcp"
-    cidr_blocks = ["${ var.cidr_block }"]
-
-  security_group_id = "${aws_security_group.polkadot_collator_nodes.id}"
-}
-
-resource "aws_security_group" "polkadot_rpc_nodes" {
-  name = "polkadot-rpc-nodes"
-}
-
-resource "aws_security_group_rule" "rpc_nodes_rule" {
-  for_each = toset(var.rpc_node_ports)
-    type            = "egress"
-    from_port       = each.key
-    to_port         = each.key
-    protocol        = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-
-  security_group_id = "${aws_security_group.polkadot_rpc_nodes.id}"
-}
-
-
 resource "aws_network_interface_sg_attachment" "all_nodes_security_group_attachment" {
   for_each = {for k, v in merge(var.boot_nodes, var.collator_nodes, var.rpc_nodes) : k => v}
-    security_group_id    = aws_security_group.polkadot_all_nodes.id
+    security_group_id    = var.security_groups[0]
     network_interface_id = aws_instance.polkadot_node[each.key].primary_network_interface_id
 }
 
 resource "aws_network_interface_sg_attachment" "collator_nodes_security_group_attachment" {
   for_each = var.collator_nodes
-    security_group_id    = aws_security_group.polkadot_collator_nodes.id
+    security_group_id    = var.collator_nodes_security_group_id
     network_interface_id = aws_instance.polkadot_node[each.key].primary_network_interface_id
 }
 
 resource "aws_network_interface_sg_attachment" "rpc_nodes_security_group_attachment" {
   for_each = var.rpc_nodes
-    security_group_id    = aws_security_group.polkadot_rpc_nodes.id
+    security_group_id    = var.security_groups[1]
     network_interface_id = aws_instance.polkadot_node[each.key].primary_network_interface_id
 }
-
 resource "aws_ebs_volume" "data_disk" {
   for_each            = var.volumes
     availability_zone = each.value.availability_zone
@@ -158,7 +101,8 @@ resource "aws_volume_attachment" "volume_attachment" {
 resource "aws_elb" "load_balancer" {
   name               = "polkadot-rpc-nodes-load-balancer"
   availability_zones = ["eu-west-1a", "eu-west-1c"]
-  security_groups = [aws_security_group.polkadot_all_nodes.id, aws_security_group.polkadot_rpc_nodes.id]
+  #security_groups = ["${split(";", var.security_groups_as_string)}"]
+  #security_groups = [aws_security_group.polkadot_all_nodes.id, aws_security_group.polkadot_rpc_nodes.id]
 
   # access_logs {
   #   bucket        = "logs"

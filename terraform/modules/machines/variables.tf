@@ -42,9 +42,13 @@ variable "subnet_id" {
   type = string
 }
 
-# variable "vpc_security_group_ids" {
-#   type = list(string)
-# }
+variable "security_groups" {
+  type = list(string)
+}
+
+variable "collator_nodes_security_group_id" {
+  type = string
+}
 
 variable "boot_nodes" {
   type = map(object({
@@ -156,22 +160,6 @@ variable "volumes" {
 
 variable "security_group_name" {
   default = "polkadot"
-}
-
-variable "cidr_block" {
-  default = "172.26.0.0/16"
-}
-
-variable "all_node_ports" {
-  default = ["30333", "30334"]
-}
-
-variable "collator_node_ports" {
-  default = ["9933", "9944"]
-}
-
-variable "rpc_node_ports" {
-  default = ["80", "443"]
 }
 
 variable "public_key" {
